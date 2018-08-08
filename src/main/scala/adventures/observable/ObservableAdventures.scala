@@ -60,7 +60,7 @@ object ObservableAdventures {
     * Returns the number of records which were saved to elastic search
     */
   def load(targetRecords: Observable[TargetRecord], elasticSearchLoad: Seq[TargetRecord] => Task[Unit]): Observable[Int] = {
-    targetRecords.bufferTumbling(5).mapAsync { batch =>
+    targetRecords.bufferTumbling(5).mapTask { batch =>
       elasticSearchLoad(batch).map(_ => batch.length)
     }
   }

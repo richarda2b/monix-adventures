@@ -1,6 +1,7 @@
 package adventures.task
 
 import cats.Applicative
+import monix.eval
 import monix.eval.Task
 
 import scala.concurrent.duration.FiniteDuration
@@ -72,19 +73,19 @@ object TaskAdventures {
     * and the cats `sequence` function. (if you haven't heard of cats / sequence skip this).
     *
     * The following imports will help.
-    * import monix.eval.Task.nondeterminism // look at the documentation / implementation for this
-    * import monix.cats._
     * import cats.implicits._
+    *
+    * implicit def parTaskApplicative: Applicative[eval.Task.Par] = Task.catsParallel.applicativeg
     */
   def calculateStringComplexityInParallelAgain(strings: List[String], complexity: String => Task[Int]): Task[Int] = {
-    import monix.eval.Task.nondeterminism
-    import monix.cats._
     import cats.implicits._
-    implicitly[Applicative[Task]]
 
-    val tasks: List[Task[Int]] = strings.map(complexity)
+    implicit def parTaskApplicative: Applicative[eval.Task.Par] = Task.catsParallel.applicative
 
-    tasks.sequence[Task, Int].map(_.sum)
+    val tasks: List[Task.Par[Int]] = strings.map(complexity).map(Task.Par.apply)
+
+    val parTask = tasks.sequence[Task.Par, Int].map(_.sum)
+    Task.Par.unwrap(parTask)
   }
 
   /**
