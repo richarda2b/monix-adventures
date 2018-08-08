@@ -72,10 +72,13 @@ object TaskAdventures {
     * 6.b. As above, but try to implement the parallel processing using the monix Applicative instance for Task
     * and the cats `sequence` function. (if you haven't heard of cats / sequence skip this).
     *
+    *
     * The following imports will help.
     * import cats.implicits._
+    * implicit def parTaskApplicative: Applicative[eval.Task.Par] = Task.catsParallel.applicative
     *
-    * implicit def parTaskApplicative: Applicative[eval.Task.Par] = Task.catsParallel.applicativeg
+    * Note that you will also need to convert from Task to Task.Par for the cats sequence operator to execute the tasks
+    * in parallel.
     */
   def calculateStringComplexityInParallelAgain(strings: List[String], complexity: String => Task[Int]): Task[Int] = {
     import cats.implicits._
